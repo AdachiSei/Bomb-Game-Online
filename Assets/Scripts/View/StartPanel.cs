@@ -38,7 +38,7 @@ namespace FourthTermPresentation.View
         private void Awake()
         {
             // デフォルトのプレイヤーネーム
-            //_playerNameInputField.text = $"player-{Random.Range(100, 1000):D03}";
+            _playerNameInputField.text = $"player-{Random.Range(100, 1000):D03}";
             // デフォルトのルーム名
             //_roomNameInputField.text = $"room-{Random.Range(100, 1000):D03}";
             _roomNameInputField.text = $"room-{100:D03}";
