@@ -28,7 +28,7 @@ namespace FourthTermPresentation.Manager
 
         [SerializeField]
         [Header("制限時間")]
-        private float _limitTime = 45f;
+        private float _limitTime = 30f;
 
         [SerializeField]
         [Header("タイマー")]
@@ -81,10 +81,9 @@ namespace FourthTermPresentation.Manager
             {
                 await UniTask.NextFrame();
                 _timer -= Time.deltaTime;
-                _timerText.text = _timer.ToString("f0");
-                if (_timer <= 0) break;
+                if (_timer <= 0f) _timerText.text = "0";
+                else _timerText.text = _timer.ToString("f0");
             }
-            _timerText.text = "0";
         }
 
         #endregion

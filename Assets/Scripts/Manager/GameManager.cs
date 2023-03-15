@@ -10,6 +10,8 @@ using TMPro;
 using FourthTermPresentation.Manager;
 using FourthTermPresentation.GamePlayer;
 using System;
+using FourthTermPresentation.Extension;
+using Template.Manager;
 
 namespace FourthTermPresentation
 {
@@ -42,7 +44,7 @@ namespace FourthTermPresentation
         private SpawnManager _spawnManager = null;
 
         [SerializeField]
-        TimeManager _timeManager = null;
+        private TimeManager _timeManager = null;
 
         [SerializeField]
         private TMP_Text _winText;
@@ -51,7 +53,7 @@ namespace FourthTermPresentation
         private PlayerComponentHolder[] _playerHolders = null;
 
         [SerializeField]
-        private ResultView _resultView = null;
+        private SceneLoader _sceneLoader = null;
 
         private void Start()
         {
@@ -95,19 +97,19 @@ namespace FourthTermPresentation
             }
         }
 
+        /// <summary>
+        /// ゲームを始めると呼ばれる関数
+        /// </summary>
         async private void StartGame()
         {
             _startGameButton.gameObject.SetActive(false);
-            SetPlayer();
-            foreach (var holder in _playerHolders)
-            {
-                await UniTask.WaitUntil(() => holder.Player != null);
-                PlayerPresenterAndKill(holder);
-            }
+            await FindPlayer();
+            _playerHolders.ForEach(x => PlayerKill(x));
             Judg();
+            Battle();
         }
 
-        private void SetPlayer()
+        async private UniTask FindPlayer()
         {
             var photonViews = FindObjectsOfType<PhotonView>();
             var players = photonViews
@@ -121,84 +123,78 @@ namespace FourthTermPresentation
                 player.transform.position = _spawnManager.SpawnPos();
                 _playerHolders[count].SetPlayer(player);
             }
+
+            await UniTask.NextFrame();
         }
 
-        async private void PlayerPresenterAndKill(PlayerComponentHolder holder)
+        async private void PlayerKill(PlayerComponentHolder holder)
         {
-            _rpcManager.OnSetIsBomber += holder.Player.SetIsBomber;
-            await UniTask.Delay(TimeSpan.FromSeconds(1f));
+            Debug.Log("Kill");
+            if (holder.Player == null) return;
+            _rpcManager.OnSetIsBomber += holder.Player.ChangeBomber;
+
+            await UniTask.NextFrame();
+
             _rpcManager.SendSetIsBomber();
-
-            _rpcManager.OnCaughtSurvivor += holder.Player.SetBomb;
+            _rpcManager.OnCaughtSurvivor += holder.Player.SetIsBomb;
             holder.Player.SendCaughtSurvivor += _rpcManager.SendCaughtSurvivor;
+        }
 
-            holder.Player
-                .ObserveEveryValueChanged(player => player.IsBomber)
-                .Subscribe(x =>
-                {
-                    if (x == true) holder.SetJobText("Bomber");
-                    else holder.SetJobText("");
-                })
-                .AddTo(this);
-
-            float limitTime = 30f;
-
+        /// <summary>
+        /// バトルをサポートする関数
+        /// </summary>
+        async private void Battle()
+        {
             while (true)
             {
-                await UniTask.WaitUntil(() => _timeManager.Timer < limitTime);
+                await UniTask.WaitUntil(() => _timeManager.Timer <= 0);
 
-                if (holder.Player.IsBomber == true)
+                var holder =
+                    _playerHolders.FirstOrDefault(x => x.Player.IsBomber == true);
+
+                holder.Player.DeactivatePlayer();
+                holder.Player.DeleteBomb();
+                holder.SetJobText("");
+
+                await UniTask.NextFrame();
+
+                if (Judg())
                 {
-                    holder.Player.DeactivatePlayer();
-                    holder.SetJobText("");
-                    await UniTask.NextFrame();
-                    Judg();
+                    _timeManager.StopTimer();
+                    await UniTask.Delay(TimeSpan.FromSeconds(5f));
+                    _sceneLoader.LoadScene(_sceneLoader.CurrentScene);
                     return;
                 }
-                else
-                {
-                    limitTime -= 15;
-                    if (limitTime < 0) return;
-                }
+                _timeManager.Init();
+                Debug.Log("Battle");
             }
         }
 
-        private void Judg()
+        /// <summary>
+        /// 勝敗が決まったか続行するかを決める関数
+        /// </summary>
+        /// <returns></returns>
+        private bool Judg()
         {
-            int tripCount = 0;
-            int dontTripCount = 0;
-            foreach (var holder in _playerHolders)
-            {
-                if (holder.Player?.IsTripping == false) dontTripCount++;
-                else tripCount++;
-            }
+            int surviveCount = 0;
+            _playerHolders
+                .ForEach(x => { if (x.Player?.IsDead == false) surviveCount++; });
 
-            if (dontTripCount == 1)
+            //生きているプレイヤーをとってくる
+            var holder = _playerHolders.FirstOrDefault(x => x.Player.IsDead == false);
+            if (surviveCount == 1)
             {
-                foreach (var holder in _playerHolders)
-                {
-                    if (holder.Player.IsTripping == false)
-                    {
-                        Debug.Log("おめでとう");
-                        if (_winText.text == "") _winText.text = $"{holder.PlayerName} Win";
-                        return;
-                    }
-                }
+                _winText.text = $"{holder.PlayerName} Win";
+                return true;
             }
             else
             {
-                foreach (var holder in _playerHolders)
-                {
-                    if (holder.Player?.IsTripping == false)
-                    {
-                        holder.SetJobText("Bomber");
-                        holder.Player.SetBomb();
-                        break;
-                    }
-                }
+                holder.SetJobText("Bomber");
+                holder.Player.SetIsBomb();
+                return false;
             }
-
         }
+
         #endregion
     }
 }

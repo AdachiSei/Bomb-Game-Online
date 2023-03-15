@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using FourthTermPresentation.Manager;
 using Photon.Pun;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -38,7 +39,11 @@ namespace FourthTermPresentation.View
         private void Awake()
         {
             // デフォルトのプレイヤーネーム
-            _playerNameInputField.text = $"player-{Random.Range(100, 1000):D03}";
+            string playerName;
+            if (PlayerNameData.PlayerName != null) playerName = PlayerNameData.PlayerName;
+            else playerName = $"player-{UnityEngine.Random.Range(100, 1000):D03}";
+            _playerNameInputField.text = playerName;
+
             // デフォルトのルーム名
             //_roomNameInputField.text = $"room-{Random.Range(100, 1000):D03}";
             _roomNameInputField.text = $"room-{100:D03}";
@@ -48,16 +53,21 @@ namespace FourthTermPresentation.View
             _uiRoot.SetActive(true);
         }
 
-        private void OnStartButtonClicked()
+        async private void OnStartButtonClicked()
         {
             _joinButton.interactable = false;
 
+            PlayerNameData.SetPlayerName(_playerNameInputField.text);
             var nickName = _playerNameInputField.text;
             var roomName = _roomNameInputField.text;
 
             _connectionManager
                 .Connect
                     (nickName, roomName, Transition, Debug.LogError);
+
+            await UniTask.Delay(TimeSpan.FromSeconds(10f));
+
+            _joinButton.interactable = true;
         }
 
         async private void Transition()
@@ -65,25 +75,6 @@ namespace FourthTermPresentation.View
             await UniTask.Delay(System.TimeSpan.FromSeconds(0.5f));
 
             _uiRoot.SetActive(false);
-
-            //TeamColor color = TeamColor.Red;
-            // チームカラーを決定して初期化
-            //switch (PhotonNetwork.PlayerList.Length)
-            //{
-            //    case 1:
-            //        color = TeamColor.Red;
-            //        break;
-            //    case 2:
-            //        color = TeamColor.Blue;
-            //        break;
-            //    case 3:
-            //        color = TeamColor.Yellow;
-            //        break;
-            //    case 4:
-            //        color = TeamColor.Green;
-            //        break;
-            //}
-            //_gameManager.Init(color);
         }
     }
 }

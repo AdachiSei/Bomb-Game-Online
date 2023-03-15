@@ -20,7 +20,7 @@ namespace FourthTermPresentation.GamePlayer
     {
         #region Property
 
-        public bool IsTripping { get; private set; }
+        public bool IsDead { get; private set; }
         public Vector3 Velocity => _rb.velocity;
         public bool IsBomber => _isBomber;
         public int ID => _photonView.ViewID;
@@ -52,6 +52,8 @@ namespace FourthTermPresentation.GamePlayer
         private Rigidbody _rb = null;
         private Animator _animator = null;
         private PhotonView _photonView = null;
+        Subject<int> _idSubject = new Subject<int>();
+        IDisposable _move = null;
 
         #endregion
 
@@ -73,31 +75,36 @@ namespace FourthTermPresentation.GamePlayer
 
             if (!_photonView.IsMine) return;
 
-            this
+            _move = this
                 .FixedUpdateAsObservable()
                 .Subscribe(_ => OnMove())
                 .AddTo(this);
 
+            _idSubject
+                .ThrottleFirst(TimeSpan.FromSeconds(1f))
+                .Subscribe(_ => ChangeBomb(_));
         }
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (!_photonView.IsMine) return;
-            if (!_isBomber)
+            if (collision.gameObject.TryGetComponent(out PlayerController player))
             {
-                if (collision.gameObject.TryGetComponent(out PhotonView player))
-                {
-                    SendCaughtSurvivor(_photonView.ViewID);
-                    SendCaughtSurvivor(player.ViewID);
-                }
+                if (!_photonView.IsMine || IsDead || player.IsDead) return;
+                else if (!_isBomber && player.IsBomber) _idSubject.OnNext(player.ID);
             }
+        }
+
+        private void ChangeBomb(int enemyID)
+        {
+            SendCaughtSurvivor?.Invoke(_photonView.ViewID);
+            SendCaughtSurvivor?.Invoke(enemyID);
         }
 
         #endregion
 
         #region Public Method
 
-        public void SetBomb(int id = 0)
+        public void SetIsBomb(int id = 0)
         {
             if (_photonView.ViewID == id || id == 0)
             {
@@ -123,12 +130,13 @@ namespace FourthTermPresentation.GamePlayer
         public void DeactivatePlayer()
         {
             _bomb.gameObject.SetActive(false);
-            IsTripping = true;
+            IsDead = true;
             _animator.SetBool("IsTripping", true);
             _rb.constraints = RigidbodyConstraints.FreezeAll;
+            _move?.Dispose();
         }
 
-        public void SetIsBomber()
+        public void ChangeBomber()
         {
             if (!_photonView.IsMine) return;
             if (PhotonNetwork.IsMasterClient)

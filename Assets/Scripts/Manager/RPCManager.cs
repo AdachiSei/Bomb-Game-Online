@@ -22,7 +22,6 @@ namespace FourthTermPresentation.Manager
         #region Events
 
         public event Action OnReceiveStartGame;
-        public event Action<string> OnSetPlayer;
         public event Action<int> OnCaughtSurvivor;
         public event Action OnSetIsBomber;
 
@@ -41,6 +40,7 @@ namespace FourthTermPresentation.Manager
 
         public void SendStartGame()
         {
+            if (PhotonNetwork.PlayerList.Length <= 1) return;
             _photonView.RPC(nameof(StartGame), RpcTarget.AllViaServer);
         }
 
@@ -61,6 +61,7 @@ namespace FourthTermPresentation.Manager
         [PunRPC]
         private void StartGame()
         {
+            PhotonNetwork.CurrentRoom.IsOpen = false;
             OnReceiveStartGame?.Invoke();
             Debug.Log("Start");
         }
