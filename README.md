@@ -1,4 +1,17 @@
-没
+# Bomb Game Online
+爆弾ゲーム×鬼ごっこのオンラインゲームです。
+
+2~4人でプレイできます。
+
+WASDキーで移動でき、マウスを動かすことでカメラを動かせます。
+
+爆弾を押しつけて最後の1人まで残ったら勝利です。
+
+[こちらからダウンロードできます](
+https://github.com/AdachiSei/Bomb-Game-Online/releases/tag/0.2)
+
+## プレイ動画
+> https://youtu.be/-mQD0FX0mhA
 
 ## 開発環境
 
