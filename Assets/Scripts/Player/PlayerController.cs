@@ -1,14 +1,11 @@
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Photon.Pun;
-using Photon.Pun.Demo.PunBasics;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UniRx;
-using UniRx.Triggers;
 using System;
 using Template.Constant;
-using FourthTermPresentation.Manager;
+using UniRx;
+using UniRx.Triggers;
+using UnityEngine;
 
 namespace FourthTermPresentation.GamePlayer
 {
@@ -32,6 +29,10 @@ namespace FourthTermPresentation.GamePlayer
         [SerializeField]
         [Header("ボム")]
         private GameObject _bomb = null;
+
+        [SerializeField]
+        [Header("ボムのマテリアル")]
+        private Material _bombMaterial = null;
 
         [SerializeField]
         [Header("歩くスピード")]
@@ -81,7 +82,7 @@ namespace FourthTermPresentation.GamePlayer
                 .AddTo(this);
 
             _idSubject
-                .ThrottleFirst(TimeSpan.FromSeconds(1f))
+                .ThrottleFirst(TimeSpan.FromSeconds(0f))
                 .Subscribe(_ => ChangeBomb(_));
         }
 
@@ -138,12 +139,35 @@ namespace FourthTermPresentation.GamePlayer
 
         public void ChangeBomber()
         {
-            if (!_photonView.IsMine) return;
+            if (!_photonView.IsMine)
+                return;
             if (PhotonNetwork.IsMasterClient)
             {
                 _isBomber = true;
                 _bomb.gameObject.SetActive(true);
             }
+        }
+
+        public async UniTask ChangeColor()
+        {
+            if (!_photonView.IsMine)
+                return;
+
+            _bombMaterial.DOKill();
+            _bombMaterial.color = Color.black;
+
+            await UniTask.Delay(TimeSpan.FromSeconds(10f));
+
+            _bombMaterial.DOKill();
+
+            await _bombMaterial.DOColor(Color.yellow, 10f);
+
+            _bombMaterial.DOKill();
+
+            await _bombMaterial.DOColor(Color.red, 10f);
+
+            _bombMaterial.DOKill();
+            _bombMaterial.color = Color.black;
         }
 
         #endregion

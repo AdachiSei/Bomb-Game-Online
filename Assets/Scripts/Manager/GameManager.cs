@@ -1,17 +1,15 @@
+using Cysharp.Threading.Tasks;
+using FourthTermPresentation.Extension;
+using FourthTermPresentation.GamePlayer;
+using FourthTermPresentation.Manager;
 using Photon.Pun;
+using System;
 using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
+using Template.Manager;
+using TMPro;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
-using UniRx;
-using Cysharp.Threading.Tasks;
-using TMPro;
-using FourthTermPresentation.Manager;
-using FourthTermPresentation.GamePlayer;
-using System;
-using FourthTermPresentation.Extension;
-using Template.Manager;
 
 namespace FourthTermPresentation
 {
@@ -132,7 +130,6 @@ namespace FourthTermPresentation
             Debug.Log("Kill");
             if (holder.Player == null) return;
             _rpcManager.OnSetIsBomber += holder.Player.ChangeBomber;
-
             await UniTask.NextFrame();
 
             _rpcManager.SendSetIsBomber();
@@ -187,12 +184,14 @@ namespace FourthTermPresentation
                 _winText.text = $"{holder.PlayerName} Win";
                 return true;
             }
-            else
-            {
-                holder.SetJobText("Bomber");
-                holder.Player.SetIsBomb();
-                return false;
-            }
+
+
+            holder.SetJobText("Bomber");
+            holder.Player.SetIsBomb();
+
+            _playerHolders
+                .ForEach(x => x.Player.ChangeColor().Forget());
+            return false;
         }
 
         #endregion

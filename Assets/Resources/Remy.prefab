@@ -1668,6 +1668,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _bomb: {fileID: 7485822330313273940}
+  _bombMaterial: {fileID: 2100000, guid: 93f2d861364694a4aae9b4edb2927f03, type: 2}
   _walkSpeed: 3
   _runSpeed: 6
   _isBomber: 0
