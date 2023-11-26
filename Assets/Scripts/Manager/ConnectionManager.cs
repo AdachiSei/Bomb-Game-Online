@@ -12,10 +12,10 @@ namespace FourthTermPresentation.Manager
     [DisallowMultipleComponent]
     public class ConnectionManager : MonoBehaviourPunCallbacks
     {
-        [SerializeField]
-        [Header("プレイ人数")]
+        /// <summary>
+        /// プレイ人数
+        /// </summary>
         byte _maxPlayers = 4;
-
         private string _roomName;
         private Action _onSuccess;
         private Action<string> _onError;
@@ -27,14 +27,17 @@ namespace FourthTermPresentation.Manager
 
         private void OnDestroy()
         {
+#if UNITY_EDITOR
             Debug.Log("Disconnect");
+#endif
             PhotonNetwork.Disconnect();
         }
 
         /// <summary>
         /// 接続
         /// </summary>
-        public void Connect(string nickName, string roomName, Action onSuccess, Action<string> onError)
+        public void Connect
+            (string nickName, string roomName, Action onSuccess, Action<string> onError)
         {
             _roomName = roomName;
             _onSuccess = onSuccess;

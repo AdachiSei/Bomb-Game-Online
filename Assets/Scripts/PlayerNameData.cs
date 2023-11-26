@@ -10,11 +10,7 @@ namespace FourthTermPresentation
     /// </summary>
     public static class PlayerNameData
     {
-        #region Properties
-        
         public static string PlayerName { get; private set; }
-
-        #endregion
 
         public static void SetPlayerName(string name)
         {

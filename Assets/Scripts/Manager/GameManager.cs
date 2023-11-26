@@ -21,8 +21,6 @@ namespace FourthTermPresentation
     {
         public PlayerComponentHolder[] PlayerComponentHolders => _playerHolders;
 
-        private static readonly int ScoreToWin = 5;
-
         [SerializeField]
         private RoomInfoView _roomInfoView = null;
 

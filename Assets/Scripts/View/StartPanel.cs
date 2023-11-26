@@ -73,7 +73,7 @@ namespace FourthTermPresentation.View
 
         private async UniTask TransitionForUniTask()
         {
-            await UniTask.Delay(System.TimeSpan.FromSeconds(0.5f));
+            await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
 
             _uiRoot.SetActive(false);
         }

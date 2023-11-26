@@ -14,15 +14,10 @@ namespace FourthTermPresentation.Manager
     public class PlayerGenerator : MonoBehaviour
     {
         [SerializeField]
-        [Header("")]
         private ConnectionManager _connectionManager = null;
 
         [SerializeField]
-        [Header("")]
         private RPCManager _rpcManager = null;
-
-        [SerializeField]
-        private GameManager _gameManager = null;
 
         [SerializeField]
         [Header("プレイヤーのプレファブ")]
