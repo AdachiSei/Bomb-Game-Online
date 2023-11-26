@@ -15,24 +15,22 @@ namespace FourthTermPresentation.Manager
     {
         [SerializeField]
         [Header("")]
-        ConnectionManager _connectionManager = null;
+        private ConnectionManager _connectionManager = null;
 
         [SerializeField]
         [Header("")]
-        RPCManager _rpcManager = null;
+        private RPCManager _rpcManager = null;
 
         [SerializeField]
-        GameManager _gameManager = null;
+        private GameManager _gameManager = null;
 
         [SerializeField]
         [Header("プレイヤーのプレファブ")]
-        PlayerController _playerPrefab;
+        private PlayerController _playerPrefab;
 
         [SerializeField]
-        [Header("カメラ")]
-        CinemachineFreeLook _freeLook = null;
-
-        #region Private Methods
+        [Header("メインカメラ")]
+        private CinemachineFreeLook _freeLook = null;
 
         private void Awake()
         {
@@ -41,12 +39,13 @@ namespace FourthTermPresentation.Manager
 
         private void Generate()
         {
-            var player = PhotonNetwork.Instantiate(_playerPrefab.name, _playerPrefab.transform.position, Quaternion.identity);
+            var prefabName = _playerPrefab.name;
+            var pos = _playerPrefab.transform.position;
+            var rot = Quaternion.identity;
+            var player =  PhotonNetwork.Instantiate(prefabName, pos, rot);
             player.name = PhotonNetwork.NickName;
             _freeLook.Follow = player.transform;
             _freeLook.LookAt = player.transform;
         }
-
-        #endregion
     }
 }

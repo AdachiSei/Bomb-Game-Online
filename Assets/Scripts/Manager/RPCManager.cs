@@ -13,30 +13,16 @@ namespace FourthTermPresentation.Manager
     [RequireComponent(typeof(PhotonView))]
     public class RPCManager : MonoBehaviour
     {
-        #region Member Variables
-
         private PhotonView _photonView;
-
-        #endregion
-
-        #region Events
 
         public event Action OnReceiveStartGame;
         public event Action<int> OnCaughtSurvivor;
         public event Action OnSetIsBomber;
 
-        #endregion
-
-        #region Unity Methods
-
         private void Awake()
         {
             TryGetComponent(out _photonView);
         }
-
-        #endregion
-
-        #region Public Methods
 
         public void SendStartGame()
         {
@@ -54,16 +40,14 @@ namespace FourthTermPresentation.Manager
             _photonView.RPC(nameof(SetIsBomber), RpcTarget.AllViaServer);
         }
 
-        #endregion
-
-        #region PunRPC Methods
-
         [PunRPC]
         private void StartGame()
         {
             PhotonNetwork.CurrentRoom.IsOpen = false;
             OnReceiveStartGame?.Invoke();
+#if UNITY_EDITOR
             Debug.Log("Start");
+#endif
         }
 
         [PunRPC]
@@ -71,7 +55,9 @@ namespace FourthTermPresentation.Manager
         private void CaughtSurvivor(int id)
         {
             OnCaughtSurvivor?.Invoke(id);
+#if UNITY_EDITOR
             Debug.Log("誰かが捕まった");
+#endif
         }
 
         [PunRPC]
@@ -79,8 +65,6 @@ namespace FourthTermPresentation.Manager
         {
             OnSetIsBomber?.Invoke();
         }
-
-        #endregion
     }
 
 }

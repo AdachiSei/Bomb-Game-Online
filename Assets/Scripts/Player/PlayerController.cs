@@ -7,24 +7,20 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 
+using RBCN = UnityEngine.RigidbodyConstraints;
+
 namespace FourthTermPresentation.GamePlayer
 {
     /// <summary>
-    /// スクリプト
+    /// プレイヤー
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerController : MonoBehaviour
     {
-        #region Property
-
         public bool IsDead { get; private set; }
         public Vector3 Velocity => _rb.velocity;
         public bool IsBomber => _isBomber;
         public int ID => _photonView.ViewID;
-
-        #endregion
-
-        #region Inspector Variables
 
         [SerializeField]
         [Header("ボム")]
@@ -46,25 +42,13 @@ namespace FourthTermPresentation.GamePlayer
         [Header("鬼なのか")]
         private bool _isBomber = false;
 
-        #endregion
-
-        #region Member Variables
-
         private Rigidbody _rb = null;
         private Animator _animator = null;
         private PhotonView _photonView = null;
-        Subject<int> _idSubject = new Subject<int>();
-        IDisposable _move = null;
-
-        #endregion
-
-        #region Events
+        private Subject<int> _idSubject = new Subject<int>();
+        private IDisposable _move = null;
 
         public event Action<int> SendCaughtSurvivor;
-
-        #endregion
-
-        #region Unity Methods
 
         private void Awake()
         {
@@ -74,7 +58,8 @@ namespace FourthTermPresentation.GamePlayer
 
             _bomb.gameObject.SetActive(false);
 
-            if (!_photonView.IsMine) return;
+            if (!_photonView.IsMine)
+                return;
 
             _move = this
                 .FixedUpdateAsObservable()
@@ -88,11 +73,14 @@ namespace FourthTermPresentation.GamePlayer
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.TryGetComponent(out PlayerController player))
-            {
-                if (!_photonView.IsMine || IsDead || player.IsDead) return;
-                else if (!_isBomber && player.IsBomber) _idSubject.OnNext(player.ID);
-            }
+            if (!collision.gameObject.TryGetComponent(out PlayerController player))
+                return;
+
+            if (!_photonView.IsMine || IsDead || player.IsDead)
+                return;
+
+            if (!_isBomber && player.IsBomber)
+                _idSubject.OnNext(player.ID);
         }
 
         private void ChangeBomb(int enemyID)
@@ -101,25 +89,13 @@ namespace FourthTermPresentation.GamePlayer
             SendCaughtSurvivor?.Invoke(enemyID);
         }
 
-        #endregion
-
-        #region Public Method
-
         public void SetIsBomb(int id = 0)
         {
-            if (_photonView.ViewID == id || id == 0)
-            {
-                if (_isBomber)
-                {
-                    _isBomber = false;
-                    _bomb.gameObject.SetActive(false);
-                }
-                else
-                {
-                    _isBomber = true;
-                    _bomb.gameObject.SetActive(true);
-                }
-            }
+            if (_photonView.ViewID != id && id != 0)
+                return;
+
+            _isBomber = _isBomber ? false : true;
+            _bomb.gameObject.SetActive(_isBomber);
         }
 
         public void DeleteBomb()
@@ -133,28 +109,23 @@ namespace FourthTermPresentation.GamePlayer
             _bomb.gameObject.SetActive(false);
             IsDead = true;
             _animator.SetBool("IsTripping", true);
-            _rb.constraints = RigidbodyConstraints.FreezeAll;
+            _rb.constraints = RBCN.FreezeAll;
             _move?.Dispose();
         }
 
         public void ChangeBomber()
         {
-            if (!_photonView.IsMine)
+            if (!_photonView.IsMine || !PhotonNetwork.IsMasterClient)
                 return;
-            if (PhotonNetwork.IsMasterClient)
-            {
-                _isBomber = true;
-                _bomb.gameObject.SetActive(true);
-            }
+
+            _isBomber = true;
+            _bomb.gameObject.SetActive(true);
         }
 
         public async UniTask ChangeColor()
         {
             if (!_photonView.IsMine)
                 return;
-
-            _bombMaterial.DOKill();
-            _bombMaterial.color = Color.black;
 
             await UniTask.Delay(TimeSpan.FromSeconds(10f));
 
@@ -170,34 +141,41 @@ namespace FourthTermPresentation.GamePlayer
             _bombMaterial.color = Color.black;
         }
 
-        #endregion
-
-        #region Private Method
-
         private void OnMove()
         {
             var h = Input.GetAxisRaw(InputName.HORIZONTAL);
             var v = Input.GetAxisRaw(InputName.VERTICAL);
             var y = _rb.velocity.y;
 
-            var speed = !Input.GetButton(InputName.FIRE3) ? _walkSpeed : _runSpeed;
-            if (!Input.GetButton(InputName.FIRE3)) _animator.SetBool("IsRunning", false);
-            else _animator.SetBool("IsRunning", true);
+            var speed =
+                !Input.GetButton(InputName.FIRE3) ?
+                    _walkSpeed : _runSpeed;
+
+            if (!Input.GetButton(InputName.FIRE3))
+                _animator.SetBool("IsRunning", false);
+            else
+                _animator.SetBool("IsRunning", true);
 
             // カメラの方向から、X-Z平面の単位ベクトルを取得
-            Vector3 cameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1)).normalized;
+            var forward = Camera.main.transform.forward;
+            var offset = new Vector3(1, 0, 1);
+            var cameraForward =
+                Vector3.Scale(forward, offset).normalized;
+
             // 方向キーの入力値とカメラの向きから、移動方向を決定
-            Vector3 moveForward = cameraForward * v + Camera.main.transform.right * h;
-            // 移動方向にスピードを掛ける。ジャンプや落下がある場合は、別途Y軸方向の速度ベクトルを足す
+            var moveForward =
+                cameraForward * v + Camera.main.transform.right * h;
+
+            // 移動方向にスピードを掛ける。
+            // ジャンプや落下がある場合は、別途Y軸方向の速度ベクトルを足す
             var velocity = moveForward * speed + new Vector3(0, y, 0);
 
             _rb.velocity = velocity;
 
-            if (moveForward != Vector3.zero) transform.rotation = Quaternion.LookRotation(moveForward);
+            if (moveForward != Vector3.zero)
+                transform.rotation = Quaternion.LookRotation(moveForward);
 
             _animator.SetFloat("Speed", velocity.magnitude);
         }
-
-        #endregion
     }
 }

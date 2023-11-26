@@ -98,7 +98,7 @@ namespace FourthTermPresentation
         /// <summary>
         /// ゲームを始めると呼ばれる関数
         /// </summary>
-        async private void StartGame()
+        private async void StartGame()
         {
             _startGameButton.gameObject.SetActive(false);
             await FindPlayer();
@@ -107,7 +107,7 @@ namespace FourthTermPresentation
             Battle();
         }
 
-        async private UniTask FindPlayer()
+        private async UniTask FindPlayer()
         {
             var photonViews = FindObjectsOfType<PhotonView>();
             var players = photonViews
@@ -125,7 +125,7 @@ namespace FourthTermPresentation
             await UniTask.NextFrame();
         }
 
-        async private void PlayerKill(PlayerComponentHolder holder)
+        private async void PlayerKill(PlayerComponentHolder holder)
         {
             Debug.Log("Kill");
             if (holder.Player == null) return;
@@ -140,7 +140,7 @@ namespace FourthTermPresentation
         /// <summary>
         /// バトルをサポートする関数
         /// </summary>
-        async private void Battle()
+        private async void Battle()
         {
             while (true)
             {

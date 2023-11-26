@@ -1,11 +1,8 @@
 using Cysharp.Threading.Tasks;
 using FourthTermPresentation.GamePlayer;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 using UniRx;
-using FourthTermPresentation.Manager;
+using UnityEngine;
 
 namespace FourthTermPresentation
 {
@@ -28,21 +25,30 @@ namespace FourthTermPresentation
         [SerializeField]
         private PlayerController _player = null;
 
-        private void Awake() =>
+        private void Awake()
+        {
             PlayerPresenter();
+        }
 
-        public void SetPlayerNameText(string name) =>
+        public void SetPlayerNameText(string name)
+        {
             _playerNameText.text = name;
+        }
 
-        public void SetJobText(string job) =>
+        public void SetJobText(string job)
+        {
             _jobText.text = job;
+        }
 
-        public void SetPlayer(PlayerController player) =>
+        public void SetPlayer(PlayerController player)
+        {
             _player = player;
+        }
 
-        async private void PlayerPresenter()
+        private async void PlayerPresenter()
         {
             await UniTask.WaitUntil(() => _player != null);
+
             _player
                 .ObserveEveryValueChanged(player => player.IsBomber)
                 .Subscribe(x =>

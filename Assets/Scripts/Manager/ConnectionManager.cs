@@ -12,42 +12,24 @@ namespace FourthTermPresentation.Manager
     [DisallowMultipleComponent]
     public class ConnectionManager : MonoBehaviourPunCallbacks
     {
-        #region Inspector Member
-
         [SerializeField]
         [Header("プレイ人数")]
         byte _maxPlayers = 4;
 
-        #endregion
-
-        #region Private Member
-
         private string _roomName;
         private Action _onSuccess;
         private Action<string> _onError;
-
-        #endregion
-
-        #region Event
 
         public event Action<Room> OnJoinedRoomEvent;
         public event Action OnJoinedRoomGeneratePlayer;
         public event Action<Player> OnPlayerEnteredEvent;
         public event Action<Player> OnPlayerLeftEvent;
 
-        #endregion
-
-        #region Unity Method
-
         private void OnDestroy()
         {
             Debug.Log("Disconnect");
             PhotonNetwork.Disconnect();
         }
-
-        #endregion
-
-        #region Public Methods
 
         /// <summary>
         /// 接続
@@ -83,40 +65,44 @@ namespace FourthTermPresentation.Manager
         /// <summary>
         /// ルームの作成に失敗したら呼ばれる関数
         /// </summary>
-        public override void OnCreateRoomFailed(short returnCode, string message) =>
+        public override void OnCreateRoomFailed(short returnCode, string message)
+        {
             _onError?.Invoke($"CreateRoomFailed: {message} ({returnCode})");
+        }
 
         /// <summary>
         /// ルームの参加に失敗したら呼ばれる関数
         /// </summary>
-        public override void OnJoinRoomFailed(short returnCode, string message) =>
+        public override void OnJoinRoomFailed(short returnCode, string message)
+        {
             _onError?.Invoke($"JoinRoomFailed: {message} ({returnCode})");
+        }
 
         /// <summary>
         /// 切断されたら呼ばれる関数
         /// </summary>
         public override void OnDisconnected(DisconnectCause cause)
         {
-            var isCause = cause != DisconnectCause.None;
-            if (isCause) _onError?.Invoke($"Disconnected: {cause}");
+            if (cause != DisconnectCause.None)
+                _onError?.Invoke($"Disconnected: {cause}");
         }
 
         /// <summary>
         /// 部屋に入ったら呼ぶ関数
         /// </summary>
         /// <param name="newPlayer"></param>
-        public override void OnPlayerEnteredRoom(Player newPlayer) =>
+        public override void OnPlayerEnteredRoom(Player newPlayer)
+        {
             OnPlayerEnteredEvent?.Invoke(newPlayer);
+        }
 
         /// <summary>
         /// 部屋から去ったら呼ぶ関数
         /// </summary>
-        public override void OnPlayerLeftRoom(Player otherPlayer) =>
+        public override void OnPlayerLeftRoom(Player otherPlayer)
+        { 
             OnPlayerLeftEvent?.Invoke(otherPlayer);
-
-        #endregion
-
-        #region Private Method
+        }
 
         /// <summary>
         /// ルームに参加するか作成する関数
@@ -129,7 +115,5 @@ namespace FourthTermPresentation.Manager
                         new RoomOptions { MaxPlayers = _maxPlayers },
                         TypedLobby.Default);
         }
-
-        #endregion
     }
 }

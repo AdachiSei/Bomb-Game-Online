@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -21,10 +19,14 @@ namespace FourthTermPresentation
         private TMP_Text[] _playerNameText = null;
 
 
-        public string SetRoomName(string name) =>
-            _roomNameText.text = name;
+        public string SetRoomName(string name)
+        {
+            return _roomNameText.text = name;
+        }
 
-        public string SetPlayerNameText(string name, int index) =>
-            _playerNameText[index].text = name;
+        public string SetPlayerNameText(string name, int index)
+        {
+            return _playerNameText[index].text = name;
+        }
     }
 }

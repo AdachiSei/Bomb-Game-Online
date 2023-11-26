@@ -27,21 +27,17 @@ namespace FourthTermPresentation.View
         [SerializeField]
         private Button _joinButton = null;
 
-        //[SerializeField]
-        //private FadeImageController _fadeImageController = null;
-
         [SerializeField]
         private ConnectionManager _connectionManager = null;
-
-        //[SerializeField]
-        //private GameManager _gameManager = null;
 
         private void Awake()
         {
             // デフォルトのプレイヤーネーム
-            string playerName;
-            if (PlayerNameData.PlayerName != null) playerName = PlayerNameData.PlayerName;
-            else playerName = $"player-{UnityEngine.Random.Range(100, 1000):D03}";
+            string playerName = 
+                PlayerNameData.PlayerName != null ? 
+                PlayerNameData.PlayerName : 
+                $"player-{UnityEngine.Random.Range(100, 1000):D03}";
+
             _playerNameInputField.text = playerName;
 
             // デフォルトのルーム名
@@ -53,7 +49,7 @@ namespace FourthTermPresentation.View
             _uiRoot.SetActive(true);
         }
 
-        async private void OnStartButtonClicked()
+        private async void OnStartButtonClicked()
         {
             _joinButton.interactable = false;
 
@@ -70,7 +66,12 @@ namespace FourthTermPresentation.View
             _joinButton.interactable = true;
         }
 
-        async private void Transition()
+        private void Transition()
+        {
+            TransitionForUniTask().Forget();
+        }
+
+        private async UniTask TransitionForUniTask()
         {
             await UniTask.Delay(System.TimeSpan.FromSeconds(0.5f));
 
