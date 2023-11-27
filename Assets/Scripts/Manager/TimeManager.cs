@@ -1,8 +1,6 @@
 using Cysharp.Threading.Tasks;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 namespace FourthTermPresentation.Manager
 {
@@ -41,7 +39,7 @@ namespace FourthTermPresentation.Manager
             if (_isCounting)
                 return;
             _isCounting = true;
-            CountTimer();
+            CountTimer().Forget();
         }
 
         public void StopTimer()
@@ -54,17 +52,15 @@ namespace FourthTermPresentation.Manager
             _timer = _limitTime;
         }
 
-        async private void CountTimer()
+        private async UniTask CountTimer()
         {
             while (_isCounting)
             {
                 await UniTask.NextFrame();
 
                 _timer -= Time.deltaTime;
-                if (_timer <= 0f)
-                    _timerText.text = "0";
-                else
-                    _timerText.text = _timer.ToString("f0");
+                _timerText.color = _timer <= 10f ? Color.red : Color.white;
+                _timerText.text = _timer <= 0f ? "0" : _timer.ToString("f0");
             }
         }
     }
