@@ -31,6 +31,18 @@ C#
 > https://github.com/neuecc/UniRx
 ### DOTween
 > https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676?locale=ja-JP
+### Photon 
+> https://assetstore.unity.com/packages/tools/network/pun-2-free-119922?locale=ja-JP
+
+
+## 製作期間
+10日
+
+# 制作意図
+オンラインゲームに興味があったのと、別のプロジェクトでメンバーの役に立つためにPhotonを覚えなければいけなかったので、Photonを勉強して作りました。
+非対称ゲームが好きで、試合中に変わったら面白いと感じ、爆弾ゲームにしてみました。
+デバッグしやすいように、エディター拡張をしました。
+一例として、すぐにビルドしやすいようにしました。
 
 # 命名規則
 
