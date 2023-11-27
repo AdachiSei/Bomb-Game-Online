@@ -188,7 +188,7 @@ namespace FourthTermPresentation
             holder.Player.SetIsBomb();
 
             _playerHolders
-                .ForEach(x => x.Player.ChangeColor().Forget());
+                .ForEach(x => x.Player?.ChangeColor().Forget());
             return false;
         }
 

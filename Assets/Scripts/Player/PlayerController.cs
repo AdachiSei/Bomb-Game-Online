@@ -127,6 +127,8 @@ namespace FourthTermPresentation.GamePlayer
             if (!_photonView.IsMine)
                 return;
 
+            _bombMaterial.color = Color.black;
+
             await UniTask.Delay(TimeSpan.FromSeconds(10f));
 
             _bombMaterial.DOKill();
