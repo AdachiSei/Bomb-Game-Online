@@ -18,6 +18,10 @@ https://github.com/AdachiSei/Bomb-Game-Online/releases/tag/0.2)
 | エンジン | バージョン  |
 | ---------- | ----------- |
 | Unity      | [こちらを参照して下さい](ProjectSettings/ProjectVersion.txt#L1) |
+### テキストエディタ
+Microsoft Visual Studio
+### 使用言語
+C#
 
 ## 導入済みアセット
 
