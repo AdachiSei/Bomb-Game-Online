@@ -47,6 +47,7 @@ namespace FourthTermPresentation.GamePlayer
         private PhotonView _photonView = null;
         private Subject<int> _idSubject = new Subject<int>();
         private IDisposable _move = null;
+        private IInputPlayer _plauyerInput = new PlayerInput();
 
         public event Action<int> SendCaughtSurvivor;
 
@@ -145,15 +146,15 @@ namespace FourthTermPresentation.GamePlayer
 
         private void OnMove()
         {
-            var h = Input.GetAxisRaw(InputName.HORIZONTAL);
-            var v = Input.GetAxisRaw(InputName.VERTICAL);
+            var h = _plauyerInput.H;
+            var v = _plauyerInput.V;
             var y = _rb.velocity.y;
 
             var speed =
-                !Input.GetButton(InputName.FIRE3) ?
+                !_plauyerInput.Fire3 ?
                     _walkSpeed : _runSpeed;
 
-            if (!Input.GetButton(InputName.FIRE3))
+            if (!_plauyerInput.Fire3)
                 _animator.SetBool("IsRunning", false);
             else
                 _animator.SetBool("IsRunning", true);
