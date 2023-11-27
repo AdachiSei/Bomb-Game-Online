@@ -70,8 +70,6 @@ namespace FourthTermPresentation
             _rpcManager.OnReceiveStartGame += StartGame;
         }
 
-        #region Private Methods
-
         private void UpdatePlayerList()
         {
             foreach (var holder in _playerHolders)
@@ -84,11 +82,19 @@ namespace FourthTermPresentation
 
             for (int i = 0; i < _playerHolders.Length; i++)
             {
-                if (PhotonNetwork.PlayerList.Length == i) break;
+                if (PhotonNetwork.PlayerList.Length == i)
+                    break;
+
                 var player = PhotonNetwork.PlayerList[i];
-                if (player == null) continue;
+
+                if (player == null)
+                    continue;
+
                 _roomInfoView.SetPlayerNameText(player.NickName, count);
-                if (player.IsMasterClient) _playerHolders[i].SetJobText("Bomber");
+
+                if (player.IsMasterClient)
+                    _playerHolders[i].SetJobText("Bomber");
+
                 count++;
             }
         }
@@ -108,14 +114,17 @@ namespace FourthTermPresentation
         private async UniTask FindPlayer()
         {
             var photonViews = FindObjectsOfType<PhotonView>();
-            var players = photonViews
-                            .OrderBy(player => player.ViewID)
-                            .Select(playes => playes.GetComponent<PlayerController>());
+            var players = 
+                photonViews
+                 .OrderBy(player => player.ViewID)
+                 .Select(playes => playes.GetComponent<PlayerController>());
+
             var count = -2;
             foreach (var player in players)
             {
                 count++;
-                if (count == -1) continue;
+                if (count == -1)
+                    continue;
                 player.transform.position = _spawnManager.SpawnPos();
                 _playerHolders[count].SetPlayer(player);
             }
@@ -126,8 +135,11 @@ namespace FourthTermPresentation
         private async void PlayerKill(PlayerComponentHolder holder)
         {
             Debug.Log("Kill");
-            if (holder.Player == null) return;
+            if (holder.Player == null)
+                return;
+
             _rpcManager.OnSetIsBomber += holder.Player.ChangeBomber;
+
             await UniTask.NextFrame();
 
             _rpcManager.SendSetIsBomber();
@@ -191,7 +203,5 @@ namespace FourthTermPresentation
                 .ForEach(x => x.Player?.ChangeColor().Forget());
             return false;
         }
-
-        #endregion
     }
 }
